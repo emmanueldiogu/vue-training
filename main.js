@@ -3,6 +3,8 @@ var app = new Vue({
   data: {
     product: 'Cubic Zaconia Jewelry',
     description: "Nice fashionable jewelry weddings and party",
+    deliveryMsg: "Your items will arrive in 1 to 3 days",
+    hideMsg: false,
     image: {
       url: './one.jpeg',
       alts: 'product image'
@@ -18,13 +20,31 @@ var app = new Vue({
     variants: [
       {
         variantId: 2234,
-        variantColor: "green"
+        variantColor: "green",
+        variantImage: './one.jpeg',
+        altText: "gree product"
       },
       {
         varientId: 2235,
-        variantColor: "blue"
+        variantColor: "blue",
+        variantImage: './two.jpeg',
+        altText: "blue product"
       }
     ],
-    sizes: [ "S", "M", "L", "XL"]
+    cart: 0
+  },
+  methods: {
+    addToCart: function () {
+      this.cart += 1
+    },
+    removeOne: function () {
+      if (this.cart > 0) {
+        this.cart -= 1
+      }
+    },
+    updateProduct: function (variantImage, altText) {
+      this.image.url = variantImage
+      this.image.alts = altText
+    }
   }
 })
