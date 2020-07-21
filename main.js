@@ -22,7 +22,7 @@ var app = new Vue({
         variantId: 2234,
         variantColor: "green",
         variantImage: './one.jpeg',
-        altText: "gree product"
+        altText: "green product"
       },
       {
         varientId: 2235,
@@ -42,7 +42,7 @@ var app = new Vue({
         this.cart -= 1
       }
     },
-    updateProduct: function (variantImage, altText) {
+    updateProduct: function (variantImage, altText, colorBox) {
       this.image.url = variantImage
       this.image.alts = altText
     }

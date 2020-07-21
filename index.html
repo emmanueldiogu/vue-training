@@ -17,18 +17,28 @@
         
         <h1> {{ product }}</h1>
         <span v-if="onSale">On Sale</span>
-        <p v-show="inStock" >In stock</p>
+        <p :class="{'out-of-stock':!inStock}">In stock</p>
+        <p :style="inStock ? '' : 'text-decoration: line-through'">In stock</p>
         <ul>
           <li v-for="detail in details"> {{ detail }}</li>
         </ul>
-        <div v-for="variant in variants" :key="variant.variantId">
-          <p @mouseover="updateProduct(variant.variantImage, variant.altText)"> {{ variant.variantColor }}</p>
+        <div  v-for="variant in variants" 
+              :key="variant.variantId"
+              class="color-box"           
+              :class="{ highlight: variant.variantImage == image.url }"
+              @mouseover="updateProduct(variant.variantImage, variant.altText)"
+              :style="{backgroundColor: variant.variantColor}">
         </div>
 
-        <button @click="addToCart">Add to cart</button>
+        <button @click="addToCart" 
+        :disabled="!inStock"
+        :class="{disabledButton: !inStock}">
+          Add to cart
+        </button>
         <button 
         @click="removeOne" 
-        v-if="this.cart > 0"
+        :disabled="!this.cart > 0"
+        :class="{disabledButton: !this.cart > 0}"
         >
           Decrease cart
         </button>
@@ -43,7 +53,7 @@
   </div>
 
   <!-- development version, includes helpful console warnings -->
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script src="./main.js"></script>
 </body>
 </html>

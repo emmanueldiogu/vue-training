@@ -1,3 +1,6 @@
+* {
+  box-sizing: border-box;
+}
 body {
   font-family: tahoma;
   color: #282828;
@@ -76,4 +79,12 @@ input {
 textarea {
   width: 100%;
   height: 60px;
+}
+
+.out-of-stock {
+  text-decoration: line-through;
+}
+
+.highlight {
+  border: 3px solid yellow;
 }
