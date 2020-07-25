@@ -37,14 +37,17 @@ img {
   width: 40px;
   height: 40px;
   margin-top: 5px;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .cart {
   margin-right: 25px;
-  /* float: right; */
+  float: right;
   border: 1px solid #d8d8d8;
   padding: 5px 20px;
-  display: inline-block;
 }
 .dblock {
   display: block;

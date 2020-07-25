@@ -1,130 +1,141 @@
-Vue.component('product-details', {
-  props: {
-    details: {
-      type: String,
-      required: true
-    }
-  },
-  template: `
-    <ul>
-      <li v-for="detail in details"> {{ detail }}</li>
-    </ul>
-  `
-})
 Vue.component('product', {
   props: {
     premium: {
       type: Boolean,
       required: true
-    }
+    },
+    cart: {
+      type: Array
+    },
   },
   template: `
-  <div class="product">
-
-    <div class="product-image">
-      <img v-bind:src="image">
-    </div>
-
-    <div class="product-info">
-      <h1> {{ title }}</h1>
-      <p v-if="inStock">In stock</p>
-      <p v-else>Out of Stock</p>
-      <p>Shipping: {{ shipping }}</p>
-
-      <product-details :details="details" />
-
-      <div  v-for="(variant, id) in variants" 
-            :key="variant.id"
-            class="color-box"
-            :class="{highlight: selectedVariant.id == variant.id}"
-            @mouseover="updateProduct(variant.id)"
-            :style="{backgroundColor: variant.color}">
+    <div class="product">
+        
+      <div class="product-image">
+        <img :src="image" />
       </div>
 
-      <button @click="addToCart" 
-      :disabled="!inStock"
-      :class="{disabledButton: !inStock}">
-        Add to cart
-      </button>
-      <button 
-      @click="removeOne" 
-      :disabled="!this.cart > 0"
-      :class="{disabledButton: !this.cart > 0}"
-      >
-        Decrease cart
-      </button>
+      <div class="product-info">
+          <h1>{{ product }}</h1>
+          <p v-if="inStock">In Stock</p>
+          <p v-else>Out of Stock</p>
+          <p>Shipping: {{ shipping }}</p>
 
-      <div class="cart">
-        <p>Cart({{ cart }})</p>
-      </div>
+          <ul>
+            <li v-for="detail in details">{{ detail }}</li>
+          </ul>
+
+          <div class="color-box"
+               v-for="variant in variants" 
+               :key="variant.id"
+               :style="{ backgroundColor: variant.color }"
+               @mouseover="updateProduct(variant.id)"
+               >
+               {{ variantRemaining(variant) }}
+          </div> 
+
+          <button
+            v-on:click="addToCart" 
+            :disabled="!selectedVariantStock"
+            :class="{ disabledButton: !selectedVariantStock }"
+            >
+          Add to cart
+          </button>
+          <button
+            @click="subtractFromCart"
+            :disableed="!selectedInCart"
+            :class="{ disableButton: !selectedInCart }">
+            Subtract from cart
+          </button>
+
+       </div>  
+    
     </div>
-
-  </div>
-  `,
+   `,
   data() {
     return {
-      brand: 'Cubic Zarconia',
-      product: '4 Piece Jewelry',
-      selectedVariantId: 2234,
-      details: ["80% cotton", "20% polyester", "Gender-neutral"],
-      onSale:true,
-      variants: [
-        {
-          id: 2234,
-          color: "green",
-          image: './one.jpeg',
-          quantity: 20
-        },
-        {
-          id: 2235,
-          color: "blue",
-          image: './two.jpeg',
-          quantity: 0
+        product: 'Socks',
+        brand: 'Vue Mastery',
+        selectedVariantId: 2234,
+        details: ['80% cotton', '20% polyester', 'Gender-neutral'],
+        variants: [
+          {
+            id: 2234,
+            color: 'green',
+            image: './one.jpeg',
+            quantity: 6     
+          },
+          {
+            id: 2235,
+            color: 'blue',
+            image: './two.jpeg',
+            quantity: 5    
+          }
+        ]
+    }
+  },
+    methods: {
+      addToCart: function() {
+        if (this.selectedVariantStock) {
+          this.$emit('add-to-cart', this.selectedVariant.id)
         }
-      ],
-      cart: 0
-    } 
-  },
-  methods: {
-    addToCart: function () {
-      this.cart += 1
-    },
-    removeOne: function () {
-      if (this.cart > 0) {
-        this.cart -= 1
+      },
+      subtractFromCart() {
+        if (this.selectedVariantId) {         
+          this.$emit('subtract-from-cart', this.selectedVariant.id)
+        }
+      },
+      updateProduct: function(index) {
+        this.selectedVariantId = index            
+      },
+      variantRemaining(variant) {
+          return variant.quantity - this.cart.filter(v => v == variant.id).length
       }
     },
-    updateProduct: function (id) {
-      this.selectedVariantId = id
+    computed: {
+        selectedVariant(){
+          return this.variants.find(v => v.id == this.selectedVariantId)
+        },
+        selectedVariantStock() {
+          return this.variantRemaining(this.selectedVariant) > 0
+        },
+        selectedInCart() {
+           return this.cart.find(id => id == this.selectedVariant.id)
+        },
+        title() {
+            return this.brand + ' ' + this.product  
+        },
+        image() {
+            return this.selectedVariant.image
+        },
+        inStock() {
+            return this.selectedVariant.quantity
+        },
+        shipping() {
+          if (this.premium) {
+            return "Free"
+          }
+            return 2.99
+        }
     }
-  },
-  computed: {
-    title: function () {
-      if (this.onSale) {
-        return this.brand + ' ' + this.product
-      }
-    },
-    selectedVariant() {
-      return this.variants.find(v=> v.id == this.selectedVariantId)
-    },
-    image() {
-      return this.selectedVariant.image
-    },
-    inStock() {
-      return this.selectedVariant.quantity
-    },
-    shipping() {
-      if (this.premium) {
-        return "free"
-      }
-      return 2.99
-    }
-  }
 })
+
 var app = new Vue({
-  el: '#app',
-  data: {
-    premium: true
-  }
-  
+    el: '#app',
+    data: {
+      premium: true,
+      cart: []
+    },
+    methods: {
+      updateCart(id) {
+        this.cart.push(id)
+      },
+      deleteCart(id) {
+        let index = this.cart.indexOf(id)
+        if(index >= 0) {
+          this.cart.splice(index, 1)
+        }
+
+      }
+    }
 })
