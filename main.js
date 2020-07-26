@@ -43,13 +43,24 @@ Vue.component('product', {
           </button>
           <button
             @click="subtractFromCart"
-            :disableed="!selectedInCart"
+            :disabled="!selectedInCart"
             :class="{ disableButton: !selectedInCart }">
             Subtract from cart
           </button>
-
-       </div>  
-    
+      </div>  
+      <div>
+        <h3>Reviews</h3>
+        <p v-if="!reviews.length">There are no reviews yet.</p>
+        <ul>
+          <li v-for="review in reviews">
+            <p> {{ review.name }}</p>
+            <p> {{ review.email }}</p>
+            <p> Rating: {{ review.rating }}</p>
+            <p> {{ review.review }}</p>
+          </li>
+        </ul>
+      </div>
+      <product-review @review-submitted="addReview" />
     </div>
    `,
   data() {
@@ -71,7 +82,8 @@ Vue.component('product', {
             image: './two.jpeg',
             quantity: 5    
           }
-        ]
+        ],
+        reviews: []
     }
   },
     methods: {
@@ -87,6 +99,9 @@ Vue.component('product', {
       },
       updateProduct: function(index) {
         this.selectedVariantId = index            
+      },
+      addReview(productReview) {
+        this.reviews.push(productReview)
       },
       variantRemaining(variant) {
           return variant.quantity - this.cart.filter(v => v == variant.id).length
@@ -118,6 +133,79 @@ Vue.component('product', {
             return 2.99
         }
     }
+})
+
+Vue.component('product-review', {
+  template: `
+    <form class="review-form" @submit.prevent="onSubmit">
+      <p v-if="errors.length" class="errors">
+        <b>Please correct the following error(s):</b>
+        <ul>
+          <li v-for="error in errors"> {{ error }}</li>
+        </ul>
+      </p>
+      <div>
+        <label for="">Name:</label>
+        <input type="text"  placeholder="Enter name" v-model="name">
+      </div>
+      <div class="form-group">
+        <label for="">Email:</label>
+        <input type="email" placeholder="Enter your email" v-model="email">
+      </div>
+      <div>
+        <label for="">Review:</label>
+        <input type="text"  placeholder="Enter Review" v-model="review">
+      </div>
+      <div class="form-group">
+        <label for="">Ratings:</label>
+        <select v-model.number="rating">
+          <option>5</option>
+          <option>4</option>
+          <option>3</option>
+          <option>2</option>
+          <option>1</option>
+        </select>
+      </div>
+      <br>
+      <input type="submit" value="Submit" >
+    </form>
+  `,
+  data() {
+    return {
+      name: null,
+      email: null,
+      review: null,
+      rating: null,
+      errors:[]
+    }
+  },
+  methods: {
+    onSubmit() {
+      this.errors = [] //this resets the error msg after the error has been corrected
+      let emailTest = /\S+@\S+\.\S+/;
+      let emailValid = emailTest.test(this.email)
+      if (this.name && emailValid && this.review && this.rating) {
+        let productReview = {
+          name: this.name,
+          email: this.email,
+          review:this.review,
+          rating: this.rating
+        }
+        this.$emit('review-submitted', productReview)
+        this.name = null
+        this.email = null
+        this.review = null
+        this.rating = null
+      }
+      else {
+        if (!this.name) { this.errors.push("Name required.") }
+        if (!this.email) { this.errors.push("Email required.") }
+        if (!emailValid) { this.errors.push("Email must be valid.") }
+        if (!this.review) { this.errors.push("Review required.") }
+        if (!this.rating) { this.errors.push("Rating required.") }
+      }
+    }
+  }
 })
 
 var app = new Vue({
